@@ -21,7 +21,7 @@
                     },
                     colors: {
                         cdz: {
-                            black: '#0A0F1C',
+                            black: '#121C33',
                             navy: '#0F2547',
                             royal: '#1D4ED8',
                             sky: '#38BDF8',
@@ -37,7 +37,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen flex flex-col">
+<body class="bg-cdz-black text-slate-900 font-sans antialiased min-h-screen flex flex-col">
 
     <!-- Toast Notification Container -->
     <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
@@ -47,12 +47,21 @@
         <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-3">
             <!-- Brand Identity -->
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cdz-royal to-cdz-sky flex items-center justify-center font-extrabold text-white text-lg shadow-md">
-                    CDZ
+                <div class="h-11 sm:h-12 max-w-[170px] sm:max-w-[200px] rounded-xl bg-white px-2.5 py-1.5 flex items-center justify-center shadow-md overflow-hidden shrink-0">
+                    <img
+                        id="cdz-header-logo"
+                        src="./CDZ Logo.JPEG"
+                        alt="CDZ Athletics Logo"
+                        class="h-full w-auto max-w-full object-contain"
+                        onerror="this.classList.add('hidden'); const fb = document.getElementById('cdz-logo-fallback'); if (fb) fb.classList.remove('hidden');"
+                    />
+                    <span id="cdz-logo-fallback" class="hidden w-9 h-9 rounded-lg bg-gradient-to-br from-cdz-royal to-cdz-sky flex items-center justify-center font-extrabold text-white text-sm">
+                        CDZ
+                    </span>
                 </div>
                 <div>
                     <h1 class="text-lg sm:text-xl font-extrabold tracking-tight leading-none">CDZ ATHLETICS</h1>
-                    <p class="text-xs text-slate-400 mt-0.5">Direct Court, Turf &amp; Facility Rentals</p>
+                    <p class="text-xs text-slate-400 mt-0.5">Court, Turf &amp; Facility Rentals</p>
                 </div>
             </div>
 
@@ -65,7 +74,7 @@
                     <button id="tab-history" onclick="switchTab('history')" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition cursor-pointer">
                         My Rentals
                     </button>
-                    <button id="tab-admin" onclick="switchTab('admin')" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition cursor-pointer">
+                    <button id="tab-admin" onclick="switchTab('admin')" class="hidden px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition cursor-pointer">
                         Admin View
                     </button>
                 </nav>
@@ -85,27 +94,15 @@
         <!-- 1. RENTER BOOKING VIEW                                           -->
         <!-- ================================================================ -->
         <section id="view-renter" class="space-y-6">
-            <!-- Status Banner: Waiver & Database Connection -->
-            <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div class="flex items-start sm:items-center gap-3">
-                    <div id="waiver-status-icon" class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
-                        <i data-lucide="shield-alert" class="w-5 h-5"></i>
-                    </div>
-                    <div>
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <h2 id="waiver-status-title" class="font-bold text-slate-900 text-sm sm:text-base">Digital Liability Waiver Required</h2>
-                            <span id="db-connection-badge" class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-600">
-                                Checking DB...
-                            </span>
-                        </div>
-                        <p id="waiver-status-desc" class="text-xs sm:text-sm text-slate-600 mt-0.5">
-                            All athletes and renters must complete our e-signature waiver before confirming a 2-hour block.
-                        </p>
-                    </div>
+            <!-- Status Banner: Database Connection -->
+            <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-cdz-sky"></span>
+                    <span class="text-xs sm:text-sm font-semibold text-slate-700">CDZ Athletics Live Rental System</span>
                 </div>
-                <button id="waiver-cta-btn" onclick="openWaiverModal()" class="px-4 py-2.5 rounded-xl bg-cdz-royal hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold shadow-sm transition shrink-0 cursor-pointer">
-                    Sign Waiver Now &rarr;
-                </button>
+                <span id="db-connection-badge" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 self-start sm:self-auto">
+                    Checking DB...
+                </span>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -135,6 +132,31 @@
                         <div id="time-slots-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                             <!-- Populated via JS -->
                         </div>
+
+                        <!-- Recurring / Multi-Week Options -->
+                        <div class="mt-5 pt-5 border-t border-slate-200 space-y-3">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                <div>
+                                    <h4 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                                        <i data-lucide="repeat" class="w-4 h-4 text-cdz-royal"></i>
+                                        Repeat / Multi-Week Schedule
+                                    </h4>
+                                    <p class="text-xs text-slate-500 mt-0.5">Book weekly across multiple weeks, or click any repeated date below to adjust its day or 2-hour time block.</p>
+                                </div>
+                                <div class="flex flex-wrap gap-1.5" id="repeat-weeks-options">
+                                    <button type="button" onclick="selectRepeatWeeks(1)" data-weeks="1" class="repeat-week-btn px-3 py-1.5 rounded-lg text-xs font-bold border transition cursor-pointer">One-time</button>
+                                    <button type="button" onclick="selectRepeatWeeks(2)" data-weeks="2" class="repeat-week-btn px-3 py-1.5 rounded-lg text-xs font-bold border transition cursor-pointer">2 Weeks (4% Discount)</button>
+                                    <button type="button" onclick="selectRepeatWeeks(3)" data-weeks="3" class="repeat-week-btn px-3 py-1.5 rounded-lg text-xs font-bold border transition cursor-pointer">3 Weeks (6% Discount)</button>
+                                    <button type="button" onclick="selectRepeatWeeks(4)" data-weeks="4" class="repeat-week-btn px-3 py-1.5 rounded-lg text-xs font-bold border transition cursor-pointer">4 Weeks (8% Discount)</button>
+                                </div>
+                            </div>
+                            <div id="recurring-schedule-preview" class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600">
+                                Select a date and 2-hour time block to preview your weekly dates.
+                            </div>
+                            <div id="recurring-session-editor" class="hidden p-3.5 rounded-xl bg-blue-50/60 border border-blue-200 space-y-3">
+                                <!-- Populated when a repeated session is clicked -->
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -156,8 +178,8 @@
 
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label for="renter-phone" class="block text-xs font-semibold text-slate-700 mb-1">Phone (Optional)</label>
-                                    <input id="renter-phone" type="tel" placeholder="(555) 234-5678" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-cdz-royal" />
+                                    <label for="renter-phone" class="block text-xs font-semibold text-slate-700 mb-1">Phone *</label>
+                                    <input id="renter-phone" type="tel" required placeholder="(555) 234-5678" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-cdz-royal" />
                                 </div>
                                 <div>
                                     <label for="group-size" class="block text-xs font-semibold text-slate-700 mb-1">Athletes in Group</label>
@@ -168,25 +190,55 @@
 
                         <!-- Order Summary Box -->
                         <div class="mt-5 p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-sm">
-                            <div class="flex justify-between text-slate-600">
-                                <span>Selected Space</span>
-                                <span id="summary-resource" class="font-semibold text-slate-900">Sports Court</span>
+                            <div class="flex justify-between gap-2 text-slate-600">
+                                <span>Selected Space:</span>
+                                <span id="summary-resource" class="font-semibold text-slate-900 text-right">Sports Court</span>
                             </div>
-                            <div class="flex justify-between text-slate-600">
-                                <span>Date &amp; Block</span>
-                                <span id="summary-slot" class="font-semibold text-slate-900">Select a time slot</span>
+                            <div class="flex justify-between gap-2 text-slate-600">
+                                <span>Date:</span>
+                                <span id="summary-date" class="font-semibold text-slate-900 text-right">Tuesday, November 24, 2026</span>
                             </div>
-                            <div class="flex justify-between text-slate-600">
-                                <span>Waiver Status</span>
-                                <span id="summary-waiver" class="font-semibold text-amber-600">Pending Signature</span>
+                            <div class="flex justify-between gap-2 text-slate-600">
+                                <span>Time Block:</span>
+                                <span id="summary-slot" class="font-semibold text-slate-900 text-right">Select a time slot</span>
                             </div>
-                            <div class="border-t border-slate-200 pt-2 flex justify-between items-center text-base font-extrabold text-cdz-black">
-                                <span>Total Due</span>
-                                <span id="summary-total">$135.00</span>
+                            <div class="flex justify-between gap-2 text-slate-600">
+                                <span>Schedule / Weeks:</span>
+                                <span id="summary-weeks" class="font-semibold text-slate-900 text-right">1 block (One-time)</span>
+                            </div>
+                            <div id="summary-discount-row" class="hidden flex justify-between gap-2 text-emerald-700">
+                                <span>Multi-Week Discount:</span>
+                                <span id="summary-discount" class="font-semibold text-emerald-700 text-right">-$0.00</span>
+                            </div>
+                            <div class="flex justify-between gap-2 text-slate-600">
+                                <span>Waiver Status:</span>
+                                <span id="summary-waiver" class="font-semibold text-slate-600 text-right">Required at Checkout</span>
+                            </div>
+                            <div class="border-t border-slate-200 pt-2 flex justify-between items-center text-base font-extrabold text-rose-700">
+                                <span id="summary-total-label" class="font-bold text-rose-700">Total Cost</span>
+                                <span id="summary-total" class="font-extrabold text-rose-700">$135.00</span>
                             </div>
                         </div>
 
-                        <button id="confirm-booking-btn" onclick="handleConfirmBooking()" class="mt-5 w-full py-3 px-4 rounded-xl bg-cdz-navy hover:bg-cdz-royal text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-2 cursor-pointer">
+                        <!-- Digital Liability Waiver Notice Right Above Confirm Button -->
+                        <div id="checkout-waiver-box" class="mt-4 p-3.5 rounded-xl bg-amber-50/90 border border-amber-200 flex items-start justify-between gap-3">
+                            <div class="flex items-start gap-2.5">
+                                <div id="waiver-status-icon" class="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center shrink-0 mt-0.5">
+                                    <i data-lucide="shield-alert" class="w-4 h-4"></i>
+                                </div>
+                                <div>
+                                    <h4 id="waiver-status-title" class="font-bold text-slate-900 text-xs sm:text-sm">Digital Liability Waiver Required Before Checkout</h4>
+                                    <p id="waiver-status-desc" class="text-[11px] sm:text-xs text-slate-600 mt-0.5 leading-snug">
+                                        Select a date and 2-hour time block first, then sign the waiver before checking out.
+                                    </p>
+                                </div>
+                            </div>
+                            <button id="waiver-cta-btn" type="button" onclick="openWaiverModal()" class="px-2.5 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-[11px] font-semibold shrink-0 cursor-pointer transition">
+                                Sign Waiver
+                            </button>
+                        </div>
+
+                        <button id="confirm-booking-btn" onclick="handleConfirmBooking()" class="mt-4 w-full py-3 px-4 rounded-xl bg-cdz-navy hover:bg-cdz-royal text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-2 cursor-pointer">
                             <i data-lucide="lock" class="w-4 h-4"></i>
                             <span id="confirm-btn-text">Pay $135 &amp; Confirm Rental</span>
                         </button>
@@ -359,11 +411,1316 @@
     <script>
         // --------------------------------------------------------------------
         // 1. SUPABASE CONFIGURATION
-        // Paste your Supabase Project URL and Publishable / Anon Key below
-        // (or reply with them in the chat and I will fill them in for you!)
         // --------------------------------------------------------------------
         const SUPABASE_URL = 'https://fxscgetvppaijkmcyqfs.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_seabWnKBW3NkDq4L1PZPAg_Di5plUz-';
 
         let supabaseClient = null;
-// ... existing code ... -->
+        try {
+            if (window.supabase && SUPABASE_URL.startsWith('https://')) {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
+        } catch (err) {
+            console.error('Supabase init error:', err);
+        }
+
+        // --------------------------------------------------------------------
+        // 2. FACILITY RESOURCES & 2-HOUR BLOCK CONFIGURATION
+        // --------------------------------------------------------------------
+        const RESOURCES = [
+            {
+                id: 'court',
+                name: 'Sports Court',
+                type: 'court',
+                priceCents: 13500,
+                maxCapacity: 12,
+                badge: 'Court',
+                description: 'Regulation indoor court (2-hr block)'
+            },
+            {
+                id: 'turf',
+                name: 'Field Turf',
+                type: 'turf',
+                priceCents: 13500,
+                maxCapacity: 20,
+                badge: 'Turf',
+                description: 'Synthetic training turf (2-hr block)'
+            },
+            {
+                id: 'facility',
+                name: 'Full Facility',
+                type: 'facility',
+                priceCents: 27500,
+                maxCapacity: 32,
+                badge: 'Court + Turf',
+                description: 'Exclusive full-facility access (2-hr block)'
+            }
+        ];
+
+        const TIME_BLOCKS = [
+            { label: '5:00 - 7:00 AM', startHour: 5, endHour: 7 },
+            { label: '7:00 - 9:00 AM', startHour: 7, endHour: 9 },
+            { label: '9:00 - 11:00 AM', startHour: 9, endHour: 11 },
+            { label: '11:00 AM - 1:00 PM', startHour: 11, endHour: 13 },
+            { label: '1:00 - 3:00 PM', startHour: 13, endHour: 15 },
+            { label: '3:00 - 5:00 PM', startHour: 15, endHour: 17 },
+            { label: '5:00 - 7:00 PM', startHour: 17, endHour: 19 },
+            { label: '7:00 - 9:00 PM', startHour: 19, endHour: 21 },
+            { label: '9:00 - 11:00 PM', startHour: 21, endHour: 23 }
+        ];
+
+        const STORAGE_KEY = 'cdz_athletics_portal_state_v1';
+        const ADMIN_EMAILS = [
+            'cdzathletics@gmail.com',
+            'dalanka@gmail.com',
+            'coachmccutcheon@yahoo.com'
+        ];
+        const VALID_REPEAT_WEEKS = [1, 2, 3, 4];
+        const REPEAT_DISCOUNT_RATES = {
+            1: 0,
+            2: 0.04,
+            3: 0.06,
+            4: 0.08
+        };
+
+        function getDiscountRateForWeeks(weeks) {
+            const normalized = VALID_REPEAT_WEEKS.includes(Number(weeks)) ? Number(weeks) : 1;
+            return REPEAT_DISCOUNT_RATES[normalized] || 0;
+        }
+
+        function calculatePackagePricingCents(unitPriceCents, weeks) {
+            const count = VALID_REPEAT_WEEKS.includes(Number(weeks)) ? Number(weeks) : 1;
+            const discountRate = getDiscountRateForWeeks(count);
+            const subtotalCents = unitPriceCents * count;
+            const discountCents = Math.round(subtotalCents * discountRate);
+            const totalCents = Math.max(0, subtotalCents - discountCents);
+            const perSessionCents = Math.round(totalCents / count);
+
+            return {
+                weeks: count,
+                discountRate,
+                discountPercent: Math.round(discountRate * 100),
+                subtotalCents,
+                discountCents,
+                totalCents,
+                perSessionCents
+            };
+        }
+
+        function getTodayISO() {
+            const now = new Date();
+            const offset = now.getTimezoneOffset();
+            const local = new Date(now.getTime() - offset * 60000);
+            return local.toISOString().split('T')[0];
+        }
+
+        function formatLongDate(isoDateStr) {
+            if (!isoDateStr) return 'Select a date';
+            const parts = isoDateStr.split('-').map(Number);
+            if (parts.length !== 3 || parts.some(Number.isNaN)) return isoDateStr;
+            const dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
+            return dateObj.toLocaleDateString('en-US', {
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric'
+            });
+        }
+
+        function loadInitialState() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    return {
+                        selectedResourceId: 'court',
+                        selectedDate: getTodayISO(),
+                        selectedSlotLabel: null,
+                        repeatWeeks: 1,
+                        customSessions: {},
+                        editingWeekIndex: null,
+                        groupSize: 1,
+                        waiverSigned: false,
+                        waiverSignerName: '',
+                        waiverSignerEmail: '',
+                        waiverSignatureUrl: '',
+                        user: null,
+                        bookings: [],
+                        waivers: [],
+                        ...parsed,
+                        repeatWeeks: VALID_REPEAT_WEEKS.includes(Number(parsed.repeatWeeks)) ? Number(parsed.repeatWeeks) : 1,
+                        customSessions: (parsed.customSessions && typeof parsed.customSessions === 'object') ? parsed.customSessions : {},
+                        editingWeekIndex: (typeof parsed.editingWeekIndex === 'number') ? parsed.editingWeekIndex : null
+                    };
+                }
+            } catch (e) {
+                console.warn('Could not read localStorage:', e);
+            }
+            return {
+                selectedResourceId: 'court',
+                selectedDate: getTodayISO(),
+                selectedSlotLabel: null,
+                repeatWeeks: 1,
+                customSessions: {},
+                editingWeekIndex: null,
+                groupSize: 1,
+                waiverSigned: false,
+                waiverSignerName: '',
+                waiverSignerEmail: '',
+                waiverSignatureUrl: '',
+                user: null,
+                bookings: [],
+                waivers: []
+            };
+        }
+
+        let state = loadInitialState();
+
+        function getSelectedResource() {
+            return RESOURCES.find((r) => r.id === state.selectedResourceId) || RESOURCES[0];
+        }
+
+        function addWeeksToISO(isoDateStr, weeksOffset) {
+            if (!isoDateStr) return '';
+            const parts = isoDateStr.split('-').map(Number);
+            if (parts.length !== 3 || parts.some(Number.isNaN)) return isoDateStr;
+            const d = new Date(parts[0], parts[1] - 1, parts[2] + (weeksOffset * 7));
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        }
+
+        function getScheduledOccurrences() {
+            const weeks = Number(state.repeatWeeks) || 1;
+            if (!state.selectedDate) return [];
+            const customMap = state.customSessions || {};
+            const list = [];
+            for (let i = 0; i < weeks; i++) {
+                const defaultDateISO = addWeeksToISO(state.selectedDate, i);
+                const override = customMap[i] || {};
+                const dateISO = override.date || defaultDateISO;
+                const slotLabel = override.slotLabel || state.selectedSlotLabel;
+                const isCustomized = Boolean(override.date && override.date !== defaultDateISO)
+                    || Boolean(override.slotLabel && override.slotLabel !== state.selectedSlotLabel);
+                const conflict = slotLabel
+                    ? isSlotBlockedForDate(slotLabel, dateISO)
+                    : false;
+                list.push({
+                    weekIndex: i,
+                    weekNumber: i + 1,
+                    defaultDate: defaultDateISO,
+                    date: dateISO,
+                    slotLabel,
+                    isCustomized,
+                    conflict
+                });
+            }
+            return list;
+        }
+
+        function hasRecurringConflict() {
+            return getScheduledOccurrences().some((occ) => occ.conflict);
+        }
+
+        function hasDateAndSlotSelected() {
+            return Boolean(state.selectedDate && state.selectedSlotLabel);
+        }
+
+        function invalidateWaiverForScheduleChange(reasonMessage) {
+            if (state.waiverSigned) {
+                state.waiverSigned = false;
+                state.waiverSignatureUrl = '';
+                if (reasonMessage) {
+                    showToast(reasonMessage);
+                }
+            }
+        }
+
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            } catch (e) {
+                console.warn('Could not write localStorage:', e);
+            }
+        }
+
+        // --------------------------------------------------------------------
+        // 3. UI TOASTS, TABS & MODALS
+        // --------------------------------------------------------------------
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            const styles = type === 'error'
+                ? 'bg-rose-600 text-white border-rose-700'
+                : 'bg-slate-900 text-white border-slate-700';
+
+            toast.className = `pointer-events-auto px-4 py-3 rounded-xl border shadow-lg text-xs sm:text-sm font-semibold flex items-center gap-2 transition ${styles}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 4000);
+        }
+
+        function isAuthorizedAdmin() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('admin') === '1' || state.staffBypass) {
+                return true;
+            }
+            const signedInEmail = (state.user && state.user.email)
+                ? String(state.user.email).trim().toLowerCase()
+                : '';
+            return Boolean(signedInEmail && ADMIN_EMAILS.includes(signedInEmail));
+        }
+
+        function updateAdminAccessUI() {
+            const adminTab = document.getElementById('tab-admin');
+            const authLabel = document.getElementById('auth-btn-label');
+            const canAccessAdmin = isAuthorizedAdmin();
+
+            if (adminTab) {
+                adminTab.classList.toggle('hidden', !canAccessAdmin);
+            }
+
+            if (authLabel) {
+                if (state.user && state.user.email) {
+                    authLabel.textContent = canAccessAdmin ? `${state.user.email} (Admin)` : state.user.email;
+                } else {
+                    authLabel.textContent = canAccessAdmin ? 'Staff / Admin' : 'Sign In';
+                }
+            }
+
+            const adminView = document.getElementById('view-admin');
+            if (!canAccessAdmin && adminView && !adminView.classList.contains('hidden')) {
+                switchTab('renter');
+            }
+        }
+
+        function switchTab(tabName) {
+            if (tabName === 'admin' && !isAuthorizedAdmin()) {
+                showToast('Admin access is restricted to authorized CDZ Athletics staff.', 'error');
+                openAuthModal();
+                return;
+            }
+
+            const views = {
+                renter: document.getElementById('view-renter'),
+                history: document.getElementById('view-history'),
+                admin: document.getElementById('view-admin')
+            };
+            const tabs = {
+                renter: document.getElementById('tab-renter'),
+                history: document.getElementById('tab-history'),
+                admin: document.getElementById('tab-admin')
+            };
+
+            Object.keys(views).forEach((key) => {
+                if (views[key]) views[key].classList.toggle('hidden', key !== tabName);
+                if (tabs[key]) {
+                    if (key === tabName) {
+                        tabs[key].className = 'px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-cdz-royal text-white transition cursor-pointer';
+                    } else {
+                        tabs[key].className = 'px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition cursor-pointer';
+                    }
+                }
+            });
+
+            if (tabName === 'history') renderUserBookings();
+            if (tabName === 'admin') {
+                renderAdminDashboard();
+                loadAdminWaivers();
+            }
+            if (window.lucide) lucide.createIcons();
+        }
+
+        // --------------------------------------------------------------------
+        // 4. SIGNATURE PAD (MOUSE + TOUCH) & WAIVER SAVING
+        // --------------------------------------------------------------------
+        let sigCanvas = null;
+        let sigCtx = null;
+        let isDrawing = false;
+        let hasDrawnSignature = false;
+
+        function initSignaturePad() {
+            sigCanvas = document.getElementById('signature-canvas');
+            if (!sigCanvas) return;
+
+            const rect = sigCanvas.parentElement.getBoundingClientRect();
+            sigCanvas.width = Math.max(300, Math.floor(rect.width));
+            sigCanvas.height = Math.max(120, Math.floor(rect.height));
+
+            sigCtx = sigCanvas.getContext('2d');
+            sigCtx.lineWidth = 2.5;
+            sigCtx.lineCap = 'round';
+            sigCtx.strokeStyle = '#0F2547';
+            hasDrawnSignature = false;
+
+            const getCoords = (e) => {
+                const bounds = sigCanvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return {
+                    x: (clientX - bounds.left) * (sigCanvas.width / bounds.width),
+                    y: (clientY - bounds.top) * (sigCanvas.height / bounds.height)
+                };
+            };
+
+            const startDraw = (e) => {
+                e.preventDefault();
+                isDrawing = true;
+                const pt = getCoords(e);
+                sigCtx.beginPath();
+                sigCtx.moveTo(pt.x, pt.y);
+            };
+
+            const moveDraw = (e) => {
+                if (!isDrawing) return;
+                e.preventDefault();
+                const pt = getCoords(e);
+                sigCtx.lineTo(pt.x, pt.y);
+                sigCtx.stroke();
+                hasDrawnSignature = true;
+            };
+
+            const endDraw = () => {
+                isDrawing = false;
+            };
+
+            sigCanvas.onmousedown = startDraw;
+            sigCanvas.onmousemove = moveDraw;
+            window.addEventListener('mouseup', endDraw);
+
+            sigCanvas.ontouchstart = startDraw;
+            sigCanvas.ontouchmove = moveDraw;
+            sigCanvas.ontouchend = endDraw;
+        }
+
+        function clearSignaturePad() {
+            if (sigCtx && sigCanvas) {
+                sigCtx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
+                hasDrawnSignature = false;
+            }
+        }
+
+        function openWaiverModal() {
+            if (!hasDateAndSlotSelected()) {
+                showToast('Please select a date and 2-hour time block first before signing the waiver.', 'error');
+                return;
+            }
+            const modal = document.getElementById('waiver-modal');
+            if (!modal) return;
+            document.getElementById('waiver-signer-name').value =
+                document.getElementById('renter-name').value || state.waiverSignerName || '';
+            document.getElementById('waiver-signer-email').value =
+                document.getElementById('renter-email').value || state.waiverSignerEmail || '';
+            modal.classList.remove('hidden');
+            setTimeout(initSignaturePad, 30);
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function closeWaiverModal() {
+            const modal = document.getElementById('waiver-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        async function submitWaiverSignature() {
+            if (!hasDateAndSlotSelected()) {
+                showToast('Please select a date and 2-hour time block before signing.', 'error');
+                closeWaiverModal();
+                return;
+            }
+
+            const signerName = document.getElementById('waiver-signer-name').value.trim();
+            const signerEmail = document.getElementById('waiver-signer-email').value.trim();
+
+            if (!signerName || !signerEmail) {
+                showToast('Please enter your full name and email address.', 'error');
+                return;
+            }
+            if (!hasDrawnSignature || !sigCanvas) {
+                showToast('Please draw your signature on the pad before submitting.', 'error');
+                return;
+            }
+
+            const signatureDataUrl = sigCanvas.toDataURL('image/png');
+            const waiverRecord = {
+                signer_name: signerName,
+                signer_email: signerEmail,
+                waiver_version: 'v1.0',
+                signature_data_url: signatureDataUrl,
+                signed_at: new Date().toISOString()
+            };
+
+            if (supabaseClient) {
+                try {
+                    const { error } = await supabaseClient
+                        .from('waivers')
+                        .insert([waiverRecord]);
+                    if (error) {
+                        showToast('Cannot save waiver to database: ' + error.message, 'error');
+                        return;
+                    }
+                } catch (err) {
+                    showToast('Database error saving waiver: ' + err.message, 'error');
+                    return;
+                }
+            }
+
+            state.waiverSigned = true;
+            state.waiverSignerName = signerName;
+            state.waiverSignerEmail = signerEmail;
+            state.waiverSignatureUrl = signatureDataUrl;
+            state.waivers.unshift(waiverRecord);
+
+            if (!document.getElementById('renter-name').value) {
+                document.getElementById('renter-name').value = signerName;
+            }
+            if (!document.getElementById('renter-email').value) {
+                document.getElementById('renter-email').value = signerEmail;
+            }
+
+            saveState();
+            updateWaiverBanner();
+            closeWaiverModal();
+            showToast('Digital Liability Waiver signed! You can now complete checkout.');
+        }
+
+        function updateWaiverBanner() {
+            const box = document.getElementById('checkout-waiver-box');
+            const iconBox = document.getElementById('waiver-status-icon');
+            const title = document.getElementById('waiver-status-title');
+            const desc = document.getElementById('waiver-status-desc');
+            const cta = document.getElementById('waiver-cta-btn');
+            const summaryWaiver = document.getElementById('summary-waiver');
+            const slotReady = hasDateAndSlotSelected();
+
+            if (state.waiverSigned && slotReady) {
+                if (box) box.className = 'mt-4 p-3.5 rounded-xl bg-emerald-50/90 border border-emerald-200 flex items-start justify-between gap-3';
+                if (iconBox) {
+                    iconBox.className = 'w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5';
+                    iconBox.innerHTML = '<i data-lucide="shield-check" class="w-4 h-4"></i>';
+                }
+                if (title) title.textContent = 'Liability Waiver Signed (v1.0)';
+                if (desc) {
+                    const weeksLabel = (state.repeatWeeks || 1) > 1 ? ` · ${state.repeatWeeks}-Week Recurring` : '';
+                    desc.textContent = `Signed by ${state.waiverSignerName} for ${formatLongDate(state.selectedDate)} (${state.selectedSlotLabel})${weeksLabel}.`;
+                }
+                if (cta) {
+                    cta.textContent = 'Update';
+                    cta.disabled = false;
+                    cta.className = 'px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-semibold shrink-0 cursor-pointer transition';
+                }
+                if (summaryWaiver) {
+                    summaryWaiver.textContent = 'Signed';
+                    summaryWaiver.className = 'font-semibold text-emerald-700 text-right';
+                }
+            } else {
+                if (box) box.className = 'mt-4 p-3.5 rounded-xl bg-amber-50/90 border border-amber-200 flex items-start justify-between gap-3';
+                if (iconBox) {
+                    iconBox.className = 'w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center shrink-0 mt-0.5';
+                    iconBox.innerHTML = '<i data-lucide="shield-alert" class="w-4 h-4"></i>';
+                }
+                if (title) title.textContent = 'Digital Liability Waiver Required Before Checkout';
+                if (desc) {
+                    desc.textContent = slotReady
+                        ? 'Sign the waiver for your selected space, date, and 2-hour block before completing payment.'
+                        : 'Select a date and 2-hour time block first, then sign the waiver before checking out.';
+                }
+                if (cta) {
+                    cta.textContent = slotReady ? 'Sign Waiver' : 'Pick Time First';
+                    cta.disabled = !slotReady;
+                    cta.className = slotReady
+                        ? 'px-2.5 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-[11px] font-semibold shrink-0 cursor-pointer transition'
+                        : 'px-2.5 py-1.5 rounded-lg bg-amber-100/80 border border-amber-200 text-amber-700/70 text-[11px] font-semibold shrink-0 cursor-not-allowed';
+                }
+                if (summaryWaiver) {
+                    summaryWaiver.textContent = 'Required Before Checkout';
+                    summaryWaiver.className = 'font-semibold text-amber-700 text-right';
+                }
+            }
+            if (window.lucide) lucide.createIcons();
+        }
+
+        // --------------------------------------------------------------------
+        // 5. TIME SLOTS, GROUP SIZE & CHECKOUT SUMMARY
+        // --------------------------------------------------------------------
+        function renderTimeSlots() {
+            const container = document.getElementById('time-slots-grid');
+            if (!container) return;
+
+            container.innerHTML = TIME_BLOCKS.map((block) => {
+                const blocked = isSlotBlocked(block.label);
+                const selected = state.selectedSlotLabel === block.label && !blocked;
+
+                if (blocked) {
+                    return `
+                        <button type="button" disabled class="p-3 rounded-xl border border-rose-200 bg-rose-50 text-left opacity-75 cursor-not-allowed">
+                            <div class="text-xs font-bold text-rose-800">${block.label}</div>
+                            <div class="text-[11px] font-semibold text-rose-600 mt-0.5">Reserved / Unavailable</div>
+                        </button>
+                    `;
+                }
+
+                return `
+                    <button type="button" onclick="selectTimeSlot('${block.label}')" class="p-3 rounded-xl border text-left transition cursor-pointer ${
+                        selected
+                            ? 'border-cdz-royal bg-cdz-ice/60 ring-2 ring-cdz-royal/30'
+                            : 'border-slate-200 bg-white hover:border-cdz-royal'
+                    }">
+                        <div class="text-xs font-bold text-slate-900">${block.label}</div>
+                        <div class="text-[11px] font-semibold text-emerald-700 mt-0.5">${selected ? 'Selected (2 hrs)' : 'Available (2 hrs)'}</div>
+                    </button>
+                `;
+            }).join('');
+
+            renderRecurringPreview();
+        }
+
+        function selectTimeSlot(slotLabel) {
+            if (isSlotBlocked(slotLabel)) {
+                showToast('That 2-hour block is already reserved.', 'error');
+                return;
+            }
+            if (state.selectedSlotLabel !== slotLabel) {
+                state.customSessions = {};
+                invalidateWaiverForScheduleChange('Time block changed — please re-sign the waiver before checking out.');
+            }
+            state.selectedSlotLabel = slotLabel;
+            saveState();
+            renderTimeSlots();
+            updateWaiverBanner();
+            updateCheckoutSummary();
+        }
+
+        function updateGroupSize(val) {
+            const res = getSelectedResource();
+            const maxCap = res.maxCapacity || 32;
+            const parsed = parseInt(val, 10);
+            const clamped = Number.isNaN(parsed) ? 1 : Math.min(maxCap, Math.max(1, parsed));
+            state.groupSize = clamped;
+            const input = document.getElementById('group-size');
+            if (input) input.value = String(clamped);
+            saveState();
+        }
+
+        function updateCheckoutSummary() {
+            const res = getSelectedResource();
+            const weeks = Number(state.repeatWeeks) || 1;
+            const pricing = calculatePackagePricingCents(res.priceCents, weeks);
+            const totalDollars = (pricing.totalCents / 100).toFixed(2);
+            const shortTotalDollars = Number.isInteger(pricing.totalCents / 100)
+                ? String(pricing.totalCents / 100)
+                : totalDollars;
+
+            const summaryResource = document.getElementById('summary-resource');
+            const summaryDate = document.getElementById('summary-date');
+            const summarySlot = document.getElementById('summary-slot');
+            const summaryWeeks = document.getElementById('summary-weeks');
+            const discountRow = document.getElementById('summary-discount-row');
+            const discountEl = document.getElementById('summary-discount');
+            const summaryTotal = document.getElementById('summary-total');
+            const confirmBtnText = document.getElementById('confirm-btn-text');
+
+            if (summaryResource) summaryResource.textContent = res.name;
+            if (summaryDate) summaryDate.textContent = formatLongDate(state.selectedDate);
+            if (summarySlot) {
+                summarySlot.textContent = state.selectedSlotLabel || 'Select a time slot';
+                summarySlot.className = state.selectedSlotLabel
+                    ? 'font-semibold text-slate-900 text-right'
+                    : 'font-semibold text-amber-700 text-right';
+            }
+            if (summaryWeeks) {
+                summaryWeeks.textContent = weeks === 1
+                    ? '1 block (One-time)'
+                    : `${weeks} weeks (${pricing.discountPercent}% Discount)`;
+            }
+            if (discountRow && discountEl) {
+                if (pricing.discountCents > 0) {
+                    discountRow.classList.remove('hidden');
+                    discountEl.textContent = `Save $${(pricing.discountCents / 100).toFixed(2)}`;
+                } else {
+                    discountRow.classList.add('hidden');
+                    discountEl.textContent = '-$0.00';
+                }
+            }
+            if (summaryTotal) summaryTotal.textContent = `$${totalDollars}`;
+            if (confirmBtnText) {
+                confirmBtnText.textContent = weeks > 1
+                    ? `Pay $${shortTotalDollars} & Confirm ${weeks} Weeks`
+                    : `Pay $${shortTotalDollars} & Confirm Rental`;
+            }
+        }
+
+        // --------------------------------------------------------------------
+        // 6. BOOKING SAVE, MY RENTALS & ADMIN DASHBOARD
+        // --------------------------------------------------------------------
+        async function finalizeBooking(bookingRecord) {
+            if (supabaseClient) {
+                try {
+                    const { error } = await supabaseClient
+                        .from('bookings')
+                        .insert([{
+                            renter_name: bookingRecord.renter_name,
+                            renter_email: bookingRecord.renter_email,
+                            renter_phone: bookingRecord.renter_phone,
+                            group_size: bookingRecord.group_size,
+                            total_paid_cents: bookingRecord.total_paid_cents,
+                            status: 'confirmed'
+                        }]);
+                    if (error) {
+                        console.warn('Supabase booking insert warning:', error.message);
+                    }
+                } catch (err) {
+                    console.warn('Supabase booking error:', err);
+                }
+            }
+
+            state.bookings.unshift(bookingRecord);
+            saveState();
+        }
+
+        async function handleConfirmBooking() {
+            const name = document.getElementById('renter-name').value.trim();
+            const email = document.getElementById('renter-email').value.trim();
+            const phone = document.getElementById('renter-phone').value.trim();
+            const res = getSelectedResource();
+            const occurrences = getScheduledOccurrences();
+
+            if (!name || !email || !phone) {
+                showToast('Please enter your full name, email address, and phone number.', 'error');
+                return;
+            }
+            if (!hasDateAndSlotSelected()) {
+                showToast('Please select a date and 2-hour time block first.', 'error');
+                return;
+            }
+            if (hasRecurringConflict()) {
+                showToast('One or more dates in your recurring schedule is already booked. Adjust weeks or pick another slot.', 'error');
+                renderRecurringPreview();
+                return;
+            }
+            if (!state.waiverSigned) {
+                showToast('You must sign the liability waiver before checking out.', 'error');
+                openWaiverModal();
+                return;
+            }
+
+            const seriesId = occurrences.length > 1 ? 'ser_' + Date.now() : null;
+            const pricing = calculatePackagePricingCents(res.priceCents, occurrences.length);
+            let allocatedCents = 0;
+
+            for (let i = 0; i < occurrences.length; i++) {
+                const occ = occurrences[i];
+                const isLastSession = i === occurrences.length - 1;
+                const sessionPaidCents = isLastSession
+                    ? Math.max(0, pricing.totalCents - allocatedCents)
+                    : pricing.perSessionCents;
+                allocatedCents += sessionPaidCents;
+
+                const bookingRecord = {
+                    id: 'bk_' + Date.now() + '_' + (i + 1),
+                    seriesId,
+                    repeatWeeks: occurrences.length,
+                    discountPercent: pricing.discountPercent,
+                    weekIndex: i + 1,
+                    renter_name: name,
+                    renter_email: email,
+                    renter_phone: phone,
+                    resourceId: res.id,
+                    resourceName: res.name,
+                    date: occ.date,
+                    slotLabel: occ.slotLabel,
+                    group_size: state.groupSize,
+                    total_paid_cents: sessionPaidCents,
+                    status: 'confirmed',
+                    created_at: new Date().toISOString()
+                };
+                await finalizeBooking(bookingRecord);
+            }
+
+            state.selectedSlotLabel = null;
+            state.repeatWeeks = 1;
+            state.customSessions = {};
+            state.editingWeekIndex = null;
+            state.waiverSigned = false;
+            state.waiverSignatureUrl = '';
+            saveState();
+
+            renderTimeSlots();
+            renderRepeatWeeksUI();
+            renderRecurringPreview();
+            updateWaiverBanner();
+            updateCheckoutSummary();
+
+            const totalDollars = (pricing.totalCents / 100).toFixed(2);
+            showToast(
+                occurrences.length > 1
+                    ? `Confirmed ${occurrences.length} weekly ${res.name} blocks ($${totalDollars}, ${pricing.discountPercent}% off) for ${name}!`
+                    : `Confirmed ${res.name} booking for ${name}!`
+            );
+        }
+
+        function renderUserBookings() {
+            const container = document.getElementById('user-bookings-list');
+            if (!container) return;
+
+            if (!state.bookings.length) {
+                container.innerHTML = `
+                    <div class="p-6 rounded-xl border border-dashed border-slate-200 text-center text-xs text-slate-500">
+                        No reservations yet. Switch to <strong>Book Space</strong> to reserve a 2-hour block.
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = state.bookings.map((b) => {
+                const paid = ((b.total_paid_cents || 0) / 100).toFixed(2);
+                const seriesBadge = b.repeatWeeks > 1
+                    ? `<span class="ml-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-800">Wk ${b.weekIndex} of ${b.repeatWeeks}</span>`
+                    : '';
+                return `
+                    <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <span class="font-bold text-slate-900 text-sm">${b.resourceName || 'Facility Space'}</span>
+                                ${seriesBadge}
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">${b.status || 'confirmed'}</span>
+                            </div>
+                            <p class="text-xs text-slate-600 mt-1">${formatLongDate(b.date)} · ${b.slotLabel || ''}</p>
+                            <p class="text-[11px] text-slate-500 mt-0.5">Renter: ${b.renter_name} (${b.renter_email}) · ${b.group_size || 1} athlete(s)</p>
+                        </div>
+                        <div class="text-left sm:text-right">
+                            <p class="text-sm font-extrabold text-rose-700">$${paid}</p>
+                            <p class="text-[11px] text-slate-400">Receipt #${String(b.id || '').slice(-6)}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderAdminDashboard() {
+            const bookingsCountEl = document.getElementById('admin-kpi-bookings');
+            const revenueEl = document.getElementById('admin-kpi-revenue');
+            const waiversCountEl = document.getElementById('admin-kpi-waivers');
+            const listEl = document.getElementById('admin-bookings-list');
+
+            const totalCents = state.bookings.reduce((sum, b) => sum + (Number(b.total_paid_cents) || 0), 0);
+            if (bookingsCountEl) bookingsCountEl.textContent = String(state.bookings.length);
+            if (revenueEl) revenueEl.textContent = `$${(totalCents / 100).toFixed(2)}`;
+            if (waiversCountEl) waiversCountEl.textContent = String(state.waivers.length);
+
+            if (!listEl) return;
+            if (!state.bookings.length) {
+                listEl.innerHTML = `
+                    <div class="p-6 rounded-xl border border-dashed border-slate-200 text-center text-xs text-slate-500">
+                        No reservations on the schedule yet.
+                    </div>
+                `;
+                return;
+            }
+
+            listEl.innerHTML = state.bookings.map((b) => {
+                const paid = ((b.total_paid_cents || 0) / 100).toFixed(2);
+                const wkLabel = b.repeatWeeks > 1 ? ` (Wk ${b.weekIndex}/${b.repeatWeeks})` : '';
+                return `
+                    <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                        <div>
+                            <span class="font-bold text-slate-900">${b.resourceName || 'Space'}${wkLabel}</span>
+                            <span class="text-slate-500"> — ${formatLongDate(b.date)} · ${b.slotLabel || ''}</span>
+                            <div class="text-[11px] text-slate-500 mt-0.5">${b.renter_name} · ${b.renter_email} · ${b.renter_phone || ''}</div>
+                        </div>
+                        <div class="font-extrabold text-rose-700">$${paid}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderResourceCards() {
+            const container = document.getElementById('resource-cards');
+            if (!container) return;
+
+            const cardThemes = {
+                court: {
+                    unselected: 'bg-sky-50 border-sky-200 hover:border-sky-400',
+                    selected: 'bg-sky-100 border-sky-600 ring-2 ring-sky-400/50',
+                    badge: 'bg-sky-200/80 text-sky-900'
+                },
+                turf: {
+                    unselected: 'bg-emerald-50 border-emerald-200 hover:border-emerald-400',
+                    selected: 'bg-emerald-100 border-emerald-600 ring-2 ring-emerald-400/50',
+                    badge: 'bg-emerald-200/80 text-emerald-900'
+                },
+                facility: {
+                    unselected: 'bg-rose-50 border-rose-200 hover:border-rose-400',
+                    selected: 'bg-rose-100 border-rose-600 ring-2 ring-rose-400/50',
+                    badge: 'bg-rose-200/80 text-rose-900'
+                }
+            };
+
+            container.innerHTML = RESOURCES.map((res) => {
+                const selected = res.id === state.selectedResourceId;
+                const priceDollars = (res.priceCents / 100).toFixed(0);
+                const theme = cardThemes[res.id] || {
+                    unselected: 'bg-white border-slate-200 hover:border-cdz-royal',
+                    selected: 'bg-cdz-ice/50 border-cdz-royal ring-2 ring-cdz-royal/30',
+                    badge: 'bg-slate-100 text-slate-700'
+                };
+                return `
+                    <button type="button" onclick="selectResource('${res.id}')" class="p-4 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between gap-2 ${
+                        selected ? theme.selected : theme.unselected
+                    }">
+                        <div>
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="font-bold text-slate-900 text-sm">${res.name}</span>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${theme.badge}">${res.badge}</span>
+                            </div>
+                            <p class="text-xs text-slate-600 mt-1">${res.description}</p>
+                        </div>
+                        <div class="text-sm font-extrabold text-cdz-black pt-1">
+                            $${priceDollars} <span class="text-[11px] font-normal text-slate-600">/ 2 hrs</span>
+                        </div>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function selectResource(resourceId) {
+            if (!RESOURCES.some((r) => r.id === resourceId)) return;
+            if (state.selectedResourceId !== resourceId) {
+                invalidateWaiverForScheduleChange('Facility space changed — please re-sign the waiver before checking out.');
+            }
+            state.selectedResourceId = resourceId;
+            const res = getSelectedResource();
+            const groupInput = document.getElementById('group-size');
+            if (groupInput) {
+                groupInput.max = String(res.maxCapacity || 32);
+                if (state.groupSize > (res.maxCapacity || 32)) {
+                    state.groupSize = res.maxCapacity || 32;
+                    groupInput.value = String(state.groupSize);
+                }
+            }
+            saveState();
+            renderResourceCards();
+            renderTimeSlots();
+            updateWaiverBanner();
+            updateCheckoutSummary();
+        }
+
+        function handleDateChange(newDateStr) {
+            if (!newDateStr) return;
+            if (state.selectedDate !== newDateStr) {
+                state.customSessions = {};
+                invalidateWaiverForScheduleChange('Date changed — please re-sign the waiver before checking out.');
+            }
+            state.selectedDate = newDateStr;
+            saveState();
+            renderTimeSlots();
+            updateWaiverBanner();
+            updateCheckoutSummary();
+        }
+
+        function isSlotBlockedForDate(slotLabel, targetDate) {
+            const chosenRes = getSelectedResource();
+            return state.bookings.some((b) => {
+                if (b.date !== targetDate || b.slotLabel !== slotLabel) return false;
+                if (b.resourceId === chosenRes.id) return true;
+                if (b.resourceId === 'facility') return true;
+                if (chosenRes.id === 'facility' && (b.resourceId === 'court' || b.resourceId === 'turf')) return true;
+                return false;
+            });
+        }
+
+        function isSlotBlocked(slotLabel) {
+            return isSlotBlockedForDate(slotLabel, state.selectedDate);
+        }
+
+        function selectRepeatWeeks(weeks) {
+            const normalized = VALID_REPEAT_WEEKS.includes(Number(weeks)) ? Number(weeks) : 1;
+            if (state.repeatWeeks !== normalized) {
+                invalidateWaiverForScheduleChange('Recurring schedule changed — please re-sign the waiver before checking out.');
+            }
+            state.repeatWeeks = normalized;
+            if (typeof state.editingWeekIndex === 'number' && state.editingWeekIndex >= normalized) {
+                state.editingWeekIndex = null;
+            }
+            saveState();
+            renderRepeatWeeksUI();
+            renderRecurringPreview();
+            updateWaiverBanner();
+            updateCheckoutSummary();
+        }
+
+        function selectRepeatedSessionToEdit(weekIndex) {
+            const idx = Number(weekIndex);
+            const maxIdx = (Number(state.repeatWeeks) || 1) - 1;
+            if (Number.isNaN(idx) || idx < 0 || idx > maxIdx) return;
+            state.editingWeekIndex = (state.editingWeekIndex === idx) ? null : idx;
+            saveState();
+            renderRecurringPreview();
+        }
+
+        function updateRepeatedSessionOverride(weekIndex, newDate, newSlotLabel) {
+            const idx = Number(weekIndex);
+            const weeks = Number(state.repeatWeeks) || 1;
+            if (Number.isNaN(idx) || idx < 0 || idx >= weeks) return;
+
+            const defaultDate = addWeeksToISO(state.selectedDate, idx);
+            const effectiveDate = newDate || defaultDate;
+            const effectiveSlot = newSlotLabel || state.selectedSlotLabel || '';
+
+            const nextOverrides = { ...(state.customSessions || {}) };
+            const isSameAsDefault = (effectiveDate === defaultDate) && (effectiveSlot === (state.selectedSlotLabel || ''));
+
+            if (isSameAsDefault) {
+                delete nextOverrides[idx];
+            } else {
+                nextOverrides[idx] = {
+                    date: effectiveDate,
+                    slotLabel: effectiveSlot
+                };
+            }
+
+            state.customSessions = nextOverrides;
+            invalidateWaiverForScheduleChange('Repeated session updated — please re-sign the waiver before checking out.');
+            saveState();
+            renderRecurringPreview();
+            updateWaiverBanner();
+            updateCheckoutSummary();
+        }
+
+        function resetRepeatedSessionOverride(weekIndex) {
+            const idx = Number(weekIndex);
+            if (!state.customSessions || !(idx in state.customSessions)) {
+                state.editingWeekIndex = null;
+                saveState();
+                renderRecurringPreview();
+                return;
+            }
+            const nextOverrides = { ...(state.customSessions || {}) };
+            delete nextOverrides[idx];
+            state.customSessions = nextOverrides;
+            invalidateWaiverForScheduleChange('Repeated session reset to default — please re-sign the waiver before checking out.');
+            saveState();
+            renderRecurringPreview();
+            updateWaiverBanner();
+            updateCheckoutSummary();
+        }
+
+        function renderRepeatWeeksUI() {
+            const buttons = document.querySelectorAll('.repeat-week-btn');
+            buttons.forEach((btn) => {
+                const w = Number(btn.getAttribute('data-weeks'));
+                const active = w === (state.repeatWeeks || 1);
+                btn.className = active
+                    ? 'repeat-week-btn px-3 py-1.5 rounded-lg text-xs font-bold border border-cdz-royal bg-cdz-royal text-white shadow-sm transition cursor-pointer'
+                    : 'repeat-week-btn px-3 py-1.5 rounded-lg text-xs font-bold border border-slate-200 bg-white hover:border-slate-300 text-slate-700 transition cursor-pointer';
+            });
+        }
+
+        function renderRecurringPreview() {
+            const preview = document.getElementById('recurring-schedule-preview');
+            const editor = document.getElementById('recurring-session-editor');
+            if (!preview) return;
+
+            const weeks = Number(state.repeatWeeks) || 1;
+            const res = getSelectedResource();
+            const pricing = calculatePackagePricingCents(res.priceCents, weeks);
+            const discountNote = pricing.discountPercent > 0
+                ? ` · <span class="text-green-700 font-bold text-xs sm:text-sm">(${pricing.discountPercent}% Discount — Save $${(pricing.discountCents / 100).toFixed(2)})</span> · <span class="text-rose-700 font-bold">Total Cost $${(pricing.totalCents / 100).toFixed(2)}</span>`
+                : ` · <span class="text-rose-700 font-bold">Total Cost $${(pricing.totalCents / 100).toFixed(2)}</span>`;
+
+            if (!state.selectedDate) {
+                preview.innerHTML = `Select a start date to preview your schedule${discountNote}.`;
+                if (editor) editor.classList.add('hidden');
+                return;
+            }
+
+            if (!state.selectedSlotLabel) {
+                const endDate = addWeeksToISO(state.selectedDate, weeks - 1);
+                preview.innerHTML = weeks === 1
+                    ? `One-time reservation on <span class="font-semibold text-slate-800">${formatLongDate(state.selectedDate)}</span>${discountNote}. Pick a 2-hour block above.`
+                    : `Weekly series (<span class="font-semibold text-slate-800">${weeks} weeks</span>) from <span class="font-semibold text-slate-800">${formatLongDate(state.selectedDate)}</span> through <span class="font-semibold text-slate-800">${formatLongDate(endDate)}</span>${discountNote}. Pick a 2-hour block above.`;
+                if (editor) editor.classList.add('hidden');
+                return;
+            }
+
+            const occurrences = getScheduledOccurrences();
+            const conflicts = occurrences.filter((o) => o.conflict);
+
+            const pills = occurrences.map((occ) => {
+                const isEditing = state.editingWeekIndex === occ.weekIndex;
+                const pillStyle = occ.conflict
+                    ? 'bg-rose-100 text-rose-800 border-rose-300'
+                    : isEditing
+                        ? 'bg-cdz-royal text-white border-cdz-royal ring-2 ring-cdz-royal/30'
+                        : occ.isCustomized
+                            ? 'bg-amber-50 text-amber-950 border-amber-300 hover:border-amber-500'
+                            : 'bg-white text-slate-700 border-slate-200 hover:border-cdz-royal';
+
+                return `
+                    <button type="button" onclick="selectRepeatedSessionToEdit(${occ.weekIndex})" title="Click to modify day or time for Week ${occ.weekNumber}" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border transition cursor-pointer ${pillStyle}">
+                        <span>Wk ${occ.weekNumber}: ${formatLongDate(occ.date)} · ${occ.slotLabel}</span>
+                        ${occ.isCustomized ? `<span class="px-1.5 py-0.2 rounded text-[10px] font-bold ${isEditing ? 'bg-white/20 text-white' : 'bg-amber-200 text-amber-900'}">Custom</span>` : ''}
+                        ${occ.conflict ? '<span class="font-bold"> (Booked)</span>' : ''}
+                    </button>
+                `;
+            }).join('');
+
+            preview.innerHTML = `
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                    <span class="font-semibold text-slate-800">
+                        ${weeks === 1 ? 'Single Session' : `${weeks} Weekly Sessions (${pricing.discountPercent}% Discount · <span class="text-green-700 font-bold">Save $${(pricing.discountCents / 100).toFixed(2)}</span> · <span class="text-rose-700 font-bold">Total Cost $${(pricing.totalCents / 100).toFixed(2)}</span>)`}
+                    </span>
+                    ${
+                        conflicts.length > 0
+                            ? `<span class="text-[11px] font-bold text-rose-700">${conflicts.length} conflict${conflicts.length > 1 ? 's' : ''} detected</span>`
+                            : `<span class="text-[11px] font-bold text-emerald-700">All ${weeks} slot${weeks > 1 ? 's' : ''} available</span>`
+                    }
+                </div>
+                <p class="text-[11px] text-slate-500 mb-2">Click any date pill below to adjust its day of the week or 2-hour time block:</p>
+                <div class="flex flex-wrap gap-1.5">${pills}</div>
+            `;
+
+            if (editor) {
+                const activeOcc = occurrences.find((o) => o.weekIndex === state.editingWeekIndex);
+                if (!activeOcc) {
+                    editor.classList.add('hidden');
+                    editor.innerHTML = '';
+                } else {
+                    editor.classList.remove('hidden');
+                    const slotOptionsHtml = TIME_BLOCKS.map((tb) => {
+                        const selectedAttr = tb.label === activeOcc.slotLabel ? 'selected' : '';
+                        const blockedOnDate = isSlotBlockedForDate(tb.label, activeOcc.date);
+                        return `<option value="${tb.label}" ${selectedAttr}>${tb.label}${blockedOnDate ? ' (Booked)' : ''}</option>`;
+                    }).join('');
+
+                    editor.innerHTML = `
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="text-xs font-bold text-slate-900">
+                                Modifying Week ${activeOcc.weekNumber}
+                                ${activeOcc.conflict ? '<span class="ml-1.5 text-rose-700 font-bold">(Conflict on selected day/time)</span>' : '<span class="ml-1.5 text-emerald-700 font-semibold">(Available)</span>'}
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button type="button" onclick="resetRepeatedSessionOverride(${activeOcc.weekIndex})" class="text-[11px] font-semibold text-slate-600 hover:text-slate-900 underline cursor-pointer">
+                                    Reset to Default
+                                </button>
+                                <button type="button" onclick="selectRepeatedSessionToEdit(${activeOcc.weekIndex})" class="text-[11px] font-bold text-cdz-royal hover:underline cursor-pointer">
+                                    Done
+                                </button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label for="override-date-${activeOcc.weekIndex}" class="block text-[11px] font-semibold text-slate-700 mb-1">Date (Changes Day of Week)</label>
+                                <input id="override-date-${activeOcc.weekIndex}" type="date" value="${activeOcc.date}" onchange="updateRepeatedSessionOverride(${activeOcc.weekIndex}, this.value, document.getElementById('override-slot-${activeOcc.weekIndex}').value)" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-cdz-royal" />
+                            </div>
+                            <div>
+                                <label for="override-slot-${activeOcc.weekIndex}" class="block text-[11px] font-semibold text-slate-700 mb-1">2-Hour Time Block</label>
+                                <select id="override-slot-${activeOcc.weekIndex}" onchange="updateRepeatedSessionOverride(${activeOcc.weekIndex}, document.getElementById('override-date-${activeOcc.weekIndex}').value, this.value)" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-cdz-royal">
+                                    ${slotOptionsHtml}
+                                </select>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        async function loadAdminWaivers() {
+            const container = document.getElementById('admin-waivers-list');
+            if (!container) return;
+
+            let rows = [...state.waivers];
+
+            if (supabaseClient) {
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('waivers')
+                        .select('id, signer_name, signer_email, waiver_version, signature_data_url, signed_at')
+                        .order('signed_at', { ascending: false })
+                        .limit(20);
+                    if (!error && Array.isArray(data) && data.length > 0) {
+                        rows = data;
+                        document.getElementById('admin-kpi-waivers').textContent = String(data.length);
+                    }
+                } catch (err) {
+                    console.warn('Could not fetch waivers from Supabase:', err);
+                }
+            }
+
+            if (!rows.length) {
+                container.innerHTML = `
+                    <div class="col-span-full p-6 rounded-xl border border-dashed border-slate-200 text-center text-xs text-slate-500">
+                        No signed waivers recorded yet. Sign a waiver to see captured signatures here.
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = rows.map((w) => `
+                <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2.5">
+                    <div class="flex items-center justify-between gap-2">
+                        <div>
+                            <p class="font-bold text-slate-900 text-sm">${w.signer_name || 'Signer'}</p>
+                            <p class="text-xs text-slate-500">${w.signer_email || ''}</p>
+                        </div>
+                        <span class="px-2 py-0.5 rounded-md bg-blue-100 text-cdz-royal text-[11px] font-bold">${w.waiver_version || 'v1.0'}</span>
+                    </div>
+                    <div class="bg-white border border-slate-200 rounded-lg p-2 flex items-center justify-center h-24">
+                        ${
+                            w.signature_data_url
+                                ? `<img src="${w.signature_data_url}" alt="Signature of ${w.signer_name}" class="max-h-20 object-contain" />`
+                                : `<span class="text-xs text-slate-400">No image preview</span>`
+                        }
+                    </div>
+                    <p class="text-[11px] text-slate-400">Signed: ${w.signed_at ? new Date(w.signed_at).toLocaleString() : 'Just now'}</p>
+                </div>
+            `).join('');
+        }
+
+        function resetDemoState() {
+            localStorage.removeItem(STORAGE_KEY);
+            state = loadInitialState();
+            saveState();
+            document.getElementById('booking-date').value = state.selectedDate;
+            updateWaiverBanner();
+            renderResourceCards();
+            renderRepeatWeeksUI();
+            renderTimeSlots();
+            updateCheckoutSummary();
+            renderAdminDashboard();
+            loadAdminWaivers();
+            showToast('Local state reset.');
+        }
+
+        function openAuthModal() {
+            const modal = document.getElementById('auth-modal');
+            const emailInput = document.getElementById('auth-email-input');
+            if (emailInput && state.user && state.user.email) {
+                emailInput.value = state.user.email;
+            }
+            if (modal) modal.classList.remove('hidden');
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function closeAuthModal() {
+            const modal = document.getElementById('auth-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        async function syncSignedInUser() {
+            if (!supabaseClient) return;
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (session && session.user && session.user.email) {
+                    state.user = {
+                        id: session.user.id,
+                        email: session.user.email.trim().toLowerCase()
+                    };
+                    if (!document.getElementById('renter-email').value) {
+                        document.getElementById('renter-email').value = state.user.email;
+                    }
+                } else {
+                    state.user = null;
+                }
+                saveState();
+                updateAdminAccessUI();
+            } catch (err) {
+                console.warn('Auth session sync warning:', err);
+            }
+        }
+
+        async function handleSendMagicLink() {
+            const email = document.getElementById('auth-email-input').value.trim().toLowerCase();
+            if (!email) {
+                showToast('Please enter an email address.', 'error');
+                return;
+            }
+            if (!supabaseClient) {
+                showToast('Supabase client not initialized.', 'error');
+                return;
+            }
+            try {
+                const { error } = await supabaseClient.auth.signInWithOtp({
+                    email,
+                    options: { emailRedirectTo: window.location.origin }
+                });
+                if (error) {
+                    showToast(error.message, 'error');
+                    return;
+                }
+                closeAuthModal();
+                showToast(`Magic link sent to ${email}!`);
+            } catch (err) {
+                showToast('Could not send magic link: ' + err.message, 'error');
+            }
+        }
+
+        async function checkDatabaseConnection() {
+            const badge = document.getElementById('db-connection-badge');
+            if (!badge) return;
+
+            if (!supabaseClient) {
+                badge.textContent = 'Local Mode';
+                badge.className = 'px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-600';
+                return;
+            }
+
+            try {
+                const { error } = await supabaseClient.from('waivers').select('id').limit(1);
+                if (error) {
+                    badge.textContent = 'DB Connected (Check Grants)';
+                    badge.className = 'px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-800';
+                } else {
+                    badge.textContent = 'Supabase Connected';
+                    badge.className = 'px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-700';
+                }
+            } catch (e) {
+                badge.textContent = 'DB Offline';
+                badge.className = 'px-2 py-0.5 rounded-full text-[11px] font-semibold bg-rose-100 text-rose-700';
+            }
+        }
+
+        // --------------------------------------------------------------------
+        // 7. INITIALIZATION
+        // --------------------------------------------------------------------
+        window.addEventListener('DOMContentLoaded', () => {
+            const dateInput = document.getElementById('booking-date');
+            if (dateInput) {
+                dateInput.value = state.selectedDate || getTodayISO();
+            }
+            if (state.waiverSignerName) {
+                document.getElementById('renter-name').value = state.waiverSignerName;
+            }
+            if (state.waiverSignerEmail) {
+                document.getElementById('renter-email').value = state.waiverSignerEmail;
+            }
+
+            if (supabaseClient && supabaseClient.auth) {
+                supabaseClient.auth.onAuthStateChange((_event, session) => {
+                    state.user = (session && session.user && session.user.email)
+                        ? { id: session.user.id, email: session.user.email.trim().toLowerCase() }
+                        : null;
+                    saveState();
+                    updateAdminAccessUI();
+                });
+            }
+
+            updateAdminAccessUI();
+            syncSignedInUser();
+            updateWaiverBanner();
+            renderResourceCards();
+            renderRepeatWeeksUI();
+            renderTimeSlots();
+            updateCheckoutSummary();
+            checkDatabaseConnection();
+
+            if (window.lucide) lucide.createIcons();
+        });
+    </script>
+</body>
+</html>
