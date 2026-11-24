@@ -485,7 +485,7 @@
                 <button onclick="closeWaiverModal()" class="flex-1 py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-sm transition">
                     Cancel
                 </button>
-                <button onclick="submitWaiver()" class="flex-1 py-2.5 px-4 bg-cdz-royal hover:bg-cdz-navy text-white font-bold rounded-xl text-sm shadow-md transition">
+                <button onclick="submitWaiver()" id="submit-waiver-btn" class="flex-1 py-2.5 px-4 bg-cdz-royal hover:bg-cdz-navy text-white font-bold rounded-xl text-sm shadow-md transition">
                     Agree & Sign Waiver
                 </button>
             </div>
@@ -510,21 +510,68 @@
             ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
             : null;
 
+        // Maps local resource keys to live Supabase `public.resources` UUIDs
+        let dbResourceIdsByType = {};
+
         async function verifySupabaseConnection() {
             if (!supabaseClient) {
                 return { connected: false, reason: 'Client not initialized' };
             }
             try {
-                const { error } = await supabaseClient
+                const { data, error } = await supabaseClient
                     .from('resources')
-                    .select('id', { count: 'exact', head: true });
+                    .select('id, name, resource_type');
                 if (error) {
                     return { connected: false, reason: error.message };
+                }
+                if (Array.isArray(data)) {
+                    data.forEach(row => {
+                        if (row.resource_type && row.id) {
+                            dbResourceIdsByType[row.resource_type] = row.id;
+                        }
+                    });
                 }
                 return { connected: true };
             } catch (err) {
                 return { connected: false, reason: err.message || 'Network error' };
             }
+        }
+
+        function resolveSupabaseResourceId(localResourceId) {
+            const localRes = RESOURCES.find(r => r.id === localResourceId);
+            if (!localRes) return null;
+            return dbResourceIdsByType[localRes.type] || null;
+        }
+
+        function buildSlotTimestamps(isoDate, slotLabel) {
+            // Converts e.g. '2026-11-24' + '09:00 AM - 11:00 AM' into ISO timestamps
+            const [startPart, endPart] = slotLabel.split(' - ').map(s => s.trim());
+            const parse12Hour = (timeStr) => {
+                const [hm, meridiem] = timeStr.split(' ');
+                let [hours, minutes] = hm.split(':').map(Number);
+                if (meridiem === 'PM' && hours !== 12) hours += 12;
+                if (meridiem === 'AM' && hours === 12) hours = 0;
+                const [y, m, d] = isoDate.split('-').map(Number);
+                return new Date(y, m - 1, d, hours, minutes, 0).toISOString();
+            };
+            return {
+                startTime: parse12Hour(startPart),
+                endTime: parse12Hour(endPart)
+            };
+        }
+
+        function formatSlotFromTimestamps(startIso, endIso) {
+            const start = new Date(startIso);
+            const end = new Date(endIso);
+            if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+                return '09:00 AM - 11:00 AM';
+            }
+            const fmt = (dt) => dt.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            });
+            return `${fmt(start)} - ${fmt(end)}`;
         }
 
         // =========================================================================
@@ -579,7 +626,7 @@
 
         // Application State
         let state = {
-            currentUser: null, // Null = Guest, or { name, email, phone } when signed in
+            currentUser: null, // Null = Guest, or { id, name, email, phone } when signed in
             selectedResourceId: 'res-court',
             selectedDate: new Date().toISOString().split('T')[0],
             selectedSlot: null,
@@ -734,6 +781,17 @@
             if (!supabaseClient || !userEmail) return;
 
             try {
+                // Ensure resource UUIDs are loaded so we can map DB rows back to UI cards
+                if (Object.keys(dbResourceIdsByType).length === 0) {
+                    await verifySupabaseConnection();
+                }
+
+                const uuidToLocalId = {};
+                RESOURCES.forEach(r => {
+                    const dbUuid = dbResourceIdsByType[r.type];
+                    if (dbUuid) uuidToLocalId[dbUuid] = r.id;
+                });
+
                 const { data: dbBookings, error: bookingsErr } = await supabaseClient
                     .from('bookings')
                     .select('id, renter_name, renter_email, resource_id, start_time, end_time, group_size, total_paid_cents, status')
@@ -747,18 +805,15 @@
                             id: b.id,
                             user: b.renter_name,
                             email: b.renter_email,
-                            resourceId: b.resource_id,
+                            resourceId: uuidToLocalId[b.resource_id] || 'res-court',
                             date: dateStr,
-                            slot: state.selectedSlot || '09:00 AM - 11:00 AM',
+                            slot: formatSlotFromTimestamps(b.start_time, b.end_time),
                             groupSize: b.group_size || 1,
                             amountPaid: Math.round((b.total_paid_cents || 0) / 100),
                             status: b.status || 'confirmed'
                         };
                     });
-                    const validMapped = mapped.filter(m => RESOURCES.some(r => r.id === m.resourceId));
-                    if (validMapped.length > 0) {
-                        state.bookings = [...validMapped, ...state.bookings.filter(existing => !validMapped.some(v => v.id === existing.id))];
-                    }
+                    state.bookings = [...mapped, ...state.bookings.filter(existing => !mapped.some(v => v.id === existing.id))];
                 }
 
                 const { data: dbInvoices, error: invErr } = await supabaseClient
@@ -768,7 +823,7 @@
 
                 if (!invErr && Array.isArray(dbInvoices) && dbInvoices.length > 0) {
                     const mappedInvoices = dbInvoices.map(inv => ({
-                        id: inv.id,
+                        id: inv.id.slice(0, 12).toUpperCase(),
                         email: inv.renter_email,
                         desc: inv.description,
                         date: inv.created_at ? new Date(inv.created_at).toISOString().split('T')[0] : state.selectedDate,
@@ -954,7 +1009,7 @@
             }
 
             list.innerHTML = visibleBookings.map(b => {
-                const res = RESOURCES.find(r => r.id === b.resourceId);
+                const res = RESOURCES.find(r => r.id === b.resourceId) || RESOURCES[0];
                 const isOwn = state.currentUser && b.email === state.currentUser.email;
                 const statusBadge = b.status === 'completed'
                     ? `<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">Past Rental</span>`
@@ -1026,7 +1081,7 @@
 
             const adminList = document.getElementById('admin-bookings-list');
             adminList.innerHTML = state.bookings.map(b => {
-                const res = RESOURCES.find(r => r.id === b.resourceId);
+                const res = RESOURCES.find(r => r.id === b.resourceId) || RESOURCES[0];
                 const isFacility = res.type === 'facility';
                 return `
                     <div class="p-4 rounded-xl border ${isFacility ? 'bg-cdz-ice/20 border-cdz-sky' : 'bg-slate-50 border-slate-200'} flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -1044,7 +1099,7 @@
         }
 
         // =========================================================================
-        // 5. USER INTERACTIONS & ACTIONS
+        // 5. USER INTERACTIONS & LIVE SUPABASE PERSISTENCE
         // =========================================================================
         function toggleAccountModal() {
             const modal = document.getElementById('account-modal');
@@ -1193,7 +1248,7 @@
             });
         }
 
-        function confirmBooking() {
+        async function confirmBooking() {
             const groupInput = document.getElementById('group-size-input');
             const parsedGroup = parseInt(groupInput ? groupInput.value : state.groupSize, 10);
             state.groupSize = (!isNaN(parsedGroup) && parsedGroup >= 1) ? parsedGroup : 1;
@@ -1224,34 +1279,108 @@
             }
 
             const res = RESOURCES.find(r => r.id === state.selectedResourceId);
-            const newBooking = {
-                id: `bk-${Math.floor(200 + Math.random() * 799)}`,
-                user: renterName,
-                email: renterEmail,
-                phone: renterPhone,
-                resourceId: state.selectedResourceId,
-                date: state.selectedDate,
-                slot: state.selectedSlot,
-                groupSize: state.groupSize,
-                amountPaid: res.blockRate,
-                status: 'confirmed'
-            };
+            const confirmBtn = document.getElementById('confirm-booking-btn');
+            const confirmText = document.getElementById('confirm-btn-text');
+            confirmBtn.disabled = true;
+            confirmText.textContent = 'Saving Reservation...';
 
-            state.bookings.push(newBooking);
+            let savedBookingId = `bk-${Math.floor(200 + Math.random() * 799)}`;
+            let savedInvoiceId = `CDZ-2026-${Math.floor(100 + Math.random() * 899)}`;
+            const invoiceDescription = `${res.name} Rental (${state.selectedSlot}) — ${renterName}`;
 
-            state.invoices.unshift({
-                id: `CDZ-2026-${Math.floor(100 + Math.random() * 899)}`,
-                email: renterEmail,
-                desc: `${res.name} Rental (${newBooking.slot}) — ${renterName}`,
-                date: state.selectedDate,
-                amount: `$${res.blockRate}.00`,
-                status: 'paid'
-            });
+            try {
+                if (supabaseClient) {
+                    if (Object.keys(dbResourceIdsByType).length === 0) {
+                        await verifySupabaseConnection();
+                    }
+                    const dbResourceUuid = resolveSupabaseResourceId(state.selectedResourceId);
+                    if (!dbResourceUuid) {
+                        throw new Error('Resources table not seeded yet in Supabase. Run schema.sql in SQL Editor.');
+                    }
 
-            state.selectedSlot = null;
+                    const { startTime, endTime } = buildSlotTimestamps(state.selectedDate, state.selectedSlot);
 
-            showToast(`Payment of $${res.blockRate} succeeded! Receipt sent to ${renterEmail}.`, 'success');
-            renderAll();
+                    const { data: bookingRow, error: bookingErr } = await supabaseClient
+                        .from('bookings')
+                        .insert({
+                            user_id: state.currentUser?.id || null,
+                            renter_name: renterName,
+                            renter_email: renterEmail,
+                            renter_phone: renterPhone || null,
+                            resource_id: dbResourceUuid,
+                            start_time: startTime,
+                            end_time: endTime,
+                            group_size: state.groupSize,
+                            total_paid_cents: res.blockRate * 100,
+                            status: 'confirmed'
+                        })
+                        .select('id')
+                        .single();
+
+                    if (bookingErr) throw bookingErr;
+                    if (bookingRow?.id) {
+                        savedBookingId = bookingRow.id;
+                    }
+
+                    const { data: invoiceRow, error: invoiceErr } = await supabaseClient
+                        .from('invoices')
+                        .insert({
+                            user_id: state.currentUser?.id || null,
+                            renter_email: renterEmail,
+                            booking_id: bookingRow?.id || null,
+                            description: invoiceDescription,
+                            amount_cents: res.blockRate * 100,
+                            status: 'paid'
+                        })
+                        .select('id')
+                        .single();
+
+                    if (invoiceErr) throw invoiceErr;
+                    if (invoiceRow?.id) {
+                        savedInvoiceId = invoiceRow.id.slice(0, 12).toUpperCase();
+                    }
+                }
+
+                const newBooking = {
+                    id: savedBookingId,
+                    user: renterName,
+                    email: renterEmail,
+                    phone: renterPhone,
+                    resourceId: state.selectedResourceId,
+                    date: state.selectedDate,
+                    slot: state.selectedSlot,
+                    groupSize: state.groupSize,
+                    amountPaid: res.blockRate,
+                    status: 'confirmed'
+                };
+
+                state.bookings.unshift(newBooking);
+
+                state.invoices.unshift({
+                    id: savedInvoiceId,
+                    email: renterEmail,
+                    desc: invoiceDescription,
+                    date: state.selectedDate,
+                    amount: `$${res.blockRate}.00`,
+                    status: 'paid'
+                });
+
+                state.selectedSlot = null;
+
+                showToast(
+                    supabaseClient
+                        ? `Saved to Supabase! $${res.blockRate} booking & receipt recorded for ${renterEmail}.`
+                        : `Payment of $${res.blockRate} succeeded! Receipt sent to ${renterEmail}.`,
+                    'success'
+                );
+                renderAll();
+            } catch (err) {
+                console.error('Supabase booking save error:', err);
+                showToast(`Database save error: ${err.message}`, 'error');
+            } finally {
+                confirmBtn.disabled = false;
+                renderBookingSummary();
+            }
         }
 
         function cancelBooking(bookingId) {
@@ -1381,16 +1510,63 @@
             document.getElementById('sig-placeholder').classList.remove('hidden');
         }
 
-        function submitWaiver() {
+        async function submitWaiver() {
             if (!hasSigned) {
                 showToast('Please draw your signature in the box first.', 'warning');
                 return;
             }
-            state.waiverSigned = true;
-            state.waiverSignedAt = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            closeWaiverModal();
-            showToast('Digital Liability Waiver signed and stored!', 'success');
-            renderAll();
+
+            const signerName = (document.getElementById('renter-name')?.value || state.currentUser?.name || 'Guest Athlete').trim();
+            const signerEmail = (document.getElementById('renter-email')?.value || state.currentUser?.email || 'guest@example.com').trim();
+            const signatureDataUrl = canvas.toDataURL('image/png');
+
+            const submitBtn = document.getElementById('submit-waiver-btn');
+            const originalLabel = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Saving Waiver...';
+
+            try {
+                if (supabaseClient) {
+                    const { error: waiverErr } = await supabaseClient
+                        .from('waivers')
+                        .insert({
+                            user_id: state.currentUser?.id || null,
+                            signer_name: signerName,
+                            signer_email: signerEmail,
+                            waiver_version: 'v1.0',
+                            signature_data_url: signatureDataUrl
+                        });
+
+                    if (waiverErr) throw waiverErr;
+
+                    if (state.currentUser?.id) {
+                        await supabaseClient
+                            .from('profiles')
+                            .update({
+                                waiver_signed: true,
+                                waiver_signed_at: new Date().toISOString()
+                            })
+                            .eq('id', state.currentUser.id);
+                    }
+                }
+
+                state.waiverSigned = true;
+                state.waiverSignedAt = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                closeWaiverModal();
+                showToast(
+                    supabaseClient
+                        ? 'Digital Liability Waiver saved to Supabase!'
+                        : 'Digital Liability Waiver signed and stored!',
+                    'success'
+                );
+                renderAll();
+            } catch (err) {
+                console.error('Supabase waiver save error:', err);
+                showToast(`Could not save waiver to database: ${err.message}`, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalLabel;
+            }
         }
 
         function updateWaiverUI() {
