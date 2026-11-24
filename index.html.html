@@ -377,12 +377,12 @@
     </div>
 
     <!-- ==================================================================== -->
-    <!-- MODAL: MAGIC-LINK AUTHENTICATION                                     -->
+    <!-- MODAL: ACCOUNT SIGN-IN                                               -->
     <!-- ==================================================================== -->
     <div id="auth-modal" class="hidden fixed inset-0 z-40 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
             <div class="flex items-center justify-between">
-                <h3 class="text-lg font-extrabold text-slate-900">Renter Account Sign-In</h3>
+                <h3 class="text-lg font-extrabold text-slate-900">Account Sign-In</h3>
                 <button onclick="closeAuthModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
@@ -393,28 +393,6 @@
             <div>
                 <label for="auth-email-input" class="block text-xs font-semibold text-slate-700 mb-1">Email Address</label>
                 <input id="auth-email-input" type="email" placeholder="you@example.com" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-cdz-royal" />
-            </div>
-
-            <!-- Instant Staff / Admin Sign-In (Bypasses Email Rate Limits for Authorized Admins) -->
-            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
-                <div class="flex items-center justify-between gap-2">
-                    <span class="text-[11px] font-bold text-slate-800">Authorized CDZ Staff / Admin</span>
-                    <span class="text-[10px] font-semibold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">No Email Needed</span>
-                </div>
-                <p class="text-[11px] text-slate-500 leading-snug">
-                    If you enter one of the 3 authorized admin emails above (or choose one below), you can sign in immediately without waiting on magic-link emails.
-                </p>
-                <div class="flex flex-wrap gap-1.5">
-                    <button type="button" onclick="handleQuickAdminSignIn('cdzathletics@gmail.com')" class="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-300 text-[11px] font-semibold text-slate-800 cursor-pointer transition">
-                        cdzathletics@gmail.com
-                    </button>
-                    <button type="button" onclick="handleQuickAdminSignIn('daLanka@gmail.com')" class="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-300 text-[11px] font-semibold text-slate-800 cursor-pointer transition">
-                        daLanka@gmail.com
-                    </button>
-                    <button type="button" onclick="handleQuickAdminSignIn('coachmccutcheon@yahoo.com')" class="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-300 text-[11px] font-semibold text-slate-800 cursor-pointer transition">
-                        coachmccutcheon@yahoo.com
-                    </button>
-                </div>
             </div>
 
             <div class="flex items-center justify-end gap-2">
@@ -690,10 +668,6 @@
         }
 
         function isAuthorizedAdmin() {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('admin') === '1' || state.staffBypass) {
-                return true;
-            }
             const signedInEmail = (state.user && state.user.email)
                 ? String(state.user.email).trim().toLowerCase()
                 : '';
@@ -711,9 +685,9 @@
 
             if (authLabel) {
                 if (state.user && state.user.email) {
-                    authLabel.textContent = canAccessAdmin ? `${state.user.email} (Admin)` : state.user.email;
+                    authLabel.textContent = state.user.email;
                 } else {
-                    authLabel.textContent = canAccessAdmin ? 'Staff / Admin' : 'Sign In';
+                    authLabel.textContent = 'Sign In';
                 }
             }
 
@@ -725,7 +699,7 @@
 
         function switchTab(tabName) {
             if (tabName === 'admin' && !isAuthorizedAdmin()) {
-                showToast('Admin access is restricted to authorized CDZ Athletics staff.', 'error');
+                showToast('Please sign in with an authorized admin email to view Admin View.', 'error');
                 openAuthModal();
                 return;
             }
@@ -1635,33 +1609,6 @@
             if (modal) modal.classList.add('hidden');
         }
 
-        function handleQuickAdminSignIn(presetEmail) {
-            const inputEl = document.getElementById('auth-email-input');
-            const rawEmail = presetEmail || (inputEl ? inputEl.value : '');
-            const normalized = String(rawEmail || '').trim().toLowerCase();
-
-            if (!ADMIN_EMAILS.includes(normalized)) {
-                showToast('Quick admin sign-in is only available for authorized admin emails.', 'error');
-                return;
-            }
-
-            state.user = {
-                id: 'staff_' + normalized.replace(/[^a-z0-9]/g, '_'),
-                email: normalized
-            };
-            if (inputEl) inputEl.value = normalized;
-            const renterEmailEl = document.getElementById('renter-email');
-            if (renterEmailEl && !renterEmailEl.value) {
-                renterEmailEl.value = normalized;
-            }
-
-            saveState();
-            updateAdminAccessUI();
-            closeAuthModal();
-            switchTab('admin');
-            showToast(`Signed in as authorized admin (${normalized}).`);
-        }
-
         async function syncSignedInUser() {
             if (!supabaseClient) return;
             try {
@@ -1674,7 +1621,7 @@
                     if (!document.getElementById('renter-email').value) {
                         document.getElementById('renter-email').value = state.user.email;
                     }
-                } else if (!state.user || !ADMIN_EMAILS.includes(String(state.user.email || '').trim().toLowerCase())) {
+                } else {
                     state.user = null;
                 }
                 saveState();
@@ -1688,10 +1635,6 @@
             const email = document.getElementById('auth-email-input').value.trim().toLowerCase();
             if (!email) {
                 showToast('Please enter an email address.', 'error');
-                return;
-            }
-            if (ADMIN_EMAILS.includes(email)) {
-                handleQuickAdminSignIn(email);
                 return;
             }
             if (!supabaseClient) {
@@ -1758,7 +1701,7 @@
                 supabaseClient.auth.onAuthStateChange((_event, session) => {
                     if (session && session.user && session.user.email) {
                         state.user = { id: session.user.id, email: session.user.email.trim().toLowerCase() };
-                    } else if (!state.user || !ADMIN_EMAILS.includes(String(state.user.email || '').trim().toLowerCase())) {
+                    } else {
                         state.user = null;
                     }
                     saveState();
